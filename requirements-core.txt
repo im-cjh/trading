@@ -1,0 +1,42 @@
+# 핵심 의존성만 (Windows 호환)
+# 시스템 실행에 필수적인 패키지만 포함
+
+# Configuration & Environment
+python-dotenv==1.0.0
+pyyaml==6.0.1
+pydantic==2.5.0
+
+# HTTP clients for KIS API
+requests==2.31.0
+aiohttp==3.9.1
+websockets==12.0
+
+# Message broker & Cache
+kafka-python==2.0.2
+redis==5.0.1
+
+# Web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# Database (SQLite 기본, PostgreSQL 선택)
+sqlalchemy==2.0.23
+alembic==1.12.1
+
+# Logging
+python-json-logger==2.0.7
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+schedule==1.2.0
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# Development
+black==23.11.0
+flake8==6.1.0

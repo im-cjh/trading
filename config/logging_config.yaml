@@ -1,0 +1,83 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  detailed:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  simple:
+    format: '%(asctime)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  
+  json:
+    class: pythonjsonlogger.jsonlogger.JsonFormatter
+    format: '%(asctime)s %(name)s %(levelname)s %(funcName)s %(lineno)d %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+  
+  file_all:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: detailed
+    filename: logs/trading_system.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 10
+    encoding: utf8
+  
+  file_trading:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: logs/trading.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 30
+    encoding: utf8
+  
+  file_orders:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: json
+    filename: logs/orders.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 30
+    encoding: utf8
+  
+  file_errors:
+    class: logging.handlers.RotatingFileHandler
+    level: ERROR
+    formatter: detailed
+    filename: logs/errors.log
+    maxBytes: 10485760  # 10MB
+    backupCount: 20
+    encoding: utf8
+
+loggers:
+  trading:
+    level: INFO
+    handlers: [file_trading, console]
+    propagate: false
+  
+  orders:
+    level: INFO
+    handlers: [file_orders, console]
+    propagate: false
+  
+  api:
+    level: DEBUG
+    handlers: [file_all]
+    propagate: false
+  
+  strategy:
+    level: INFO
+    handlers: [file_all, console]
+    propagate: false
+
+root:
+  level: INFO
+  handlers: [console, file_all, file_errors]

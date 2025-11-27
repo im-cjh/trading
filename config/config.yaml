@@ -1,0 +1,132 @@
+# 거래 모드 설정
+trading_mode: "mock"  # "mock" 또는 "real"
+
+# API 설정
+api:
+  request_timeout: 10  # seconds
+  max_retries: 3
+  retry_delay: 1  # seconds
+  rate_limit:
+    requests_per_second: 5
+    requests_per_minute: 100
+
+# 데이터베이스 설정
+database:
+  # 개발/테스트용 SQLite
+  sqlite:
+    path: "data/trading.db"
+  
+  # 프로덕션용 PostgreSQL
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "trading_db"
+    user: "trading_user"
+    password: "trading_password"
+  
+  # 현재 사용하는 DB
+  use: "sqlite"  # "sqlite" 또는 "postgresql"
+
+# Redis 설정
+redis:
+  host: "localhost"
+  port: 6379
+  db: 0
+  password: null
+  expire_time:
+    tick_data: 3600      # 1시간
+    feature_cache: 1800  # 30분
+    quote_cache: 60      # 1분
+
+# Kafka 설정
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topics:
+    market_data: "market-data"
+    order_events: "order-events"
+    predictions: "predictions"
+  consumer_group: "trading-system"
+
+# 리스크 관리
+risk_management:
+  # 손실 제한
+  max_daily_loss_percent: 3.0  # 일일 최대 손실률 (%)
+  max_daily_loss_amount: 1000000  # 일일 최대 손실액 (원)
+  
+  # 포지션 제한
+  max_position_size_percent: 10.0  # 단일 종목 최대 비중 (%)
+  max_total_positions: 10  # 최대 보유 종목 수
+  max_sector_exposure: 30.0  # 섹터별 최대 비중 (%)
+  
+  # 거래 제한
+  max_trades_per_day: 50  # 일일 최대 거래 횟수
+  min_trade_interval: 5  # 동일 종목 최소 거래 간격 (초)
+  
+  # 스탑로스
+  default_stop_loss_percent: 5.0  # 기본 손절 비율 (%)
+  trailing_stop_percent: 3.0  # 트레일링 스탑 비율 (%)
+  
+  # 이익실현
+  default_take_profit_percent: 10.0  # 기본 익절 비율 (%)
+
+# AI 모델 설정
+ai_model:
+  server_url: "http://localhost:8001"
+  model_type: "transformer"  # "transformer" 또는 "lstm"
+  prediction_threshold:
+    buy: 0.7   # 매수 신뢰도 임계값
+    sell: 0.7  # 매도 신뢰도 임계값
+  batch_size: 32
+  timeout: 5  # seconds
+
+# 전략 설정
+strategy:
+  # 종목 선정
+  min_price: 5000  # 최소 주가 (원)
+  max_price: 500000  # 최대 주가 (원)
+  min_volume: 100000  # 최소 거래량 (주)
+  
+  # 기술지표 파라미터
+  indicators:
+    macd:
+      fast_period: 12
+      slow_period: 26
+      signal_period: 9
+    rsi:
+      period: 14
+      overbought: 70
+      oversold: 30
+    atr:
+      period: 14
+    bollinger:
+      period: 20
+      std_dev: 2
+  
+  # 시그널 가중치
+  signal_weights:
+    ai_prediction: 0.5
+    technical_indicators: 0.3
+    volume_analysis: 0.2
+
+# 스케줄 설정 (KST 기준)
+schedule:
+  market_open: "09:00"
+  market_close: "15:30"
+  pre_market_setup: "08:50"
+  post_market_cleanup: "15:35"
+  daily_report: "16:00"
+
+# 모니터링 설정
+monitoring:
+  dashboard_port: 8000
+  metrics_port: 9090
+  alert_channels:
+    - type: "log"
+      level: "ERROR"
+    # - type: "email"
+    #   to: "your-email@example.com"
+    # - type: "slack"
+    #   webhook_url: "https://hooks.slack.com/..."
+
+# 로깅 레벨
+log_level: "INFO"  # "DEBUG", "INFO", "WARNING", "ERROR"

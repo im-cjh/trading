@@ -1,0 +1,15 @@
+# Windows용 최소 설치 스크립트
+# 버전 제약 없이 최신 호환 버전 설치
+
+# 핵심 의존성 (버전 제약 완화)
+pyyaml
+pydantic>=2.0
+requests
+aiohttp
+websockets
+sqlalchemy
+python-json-logger
+
+# 개발/테스트
+pytest
+pytest-asyncio
