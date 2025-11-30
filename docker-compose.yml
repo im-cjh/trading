@@ -56,12 +56,33 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  # Trading Bot Application
+  trading-bot:
+    build: .
+    container_name: trading-bot
+    depends_on:
+      - kafka
+      - redis
+      - postgres
+    environment:
+      - TRADING_MODE=mock
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - DB_HOST=postgres
+    volumes:
+      - ./config:/app/config
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+
 volumes:
   zookeeper-data:
   zookeeper-logs:
   kafka-data:
   redis-data:
   postgres-data:
+
 
 networks:
   default:

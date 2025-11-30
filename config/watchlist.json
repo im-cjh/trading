@@ -1,0 +1,215 @@
+{
+  "updated_at": "2025-11-30T14:53:16.460971",
+  "stocks": [
+    {
+      "code": "373220",
+      "score": 88.93370849315917,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 89.35811778737278,
+          "details": {
+            "factor_score": 100,
+            "supply_score": 100,
+            "volatility_score": 64.52705929124261,
+            "metrics": {
+              "roe": 15.611760770666761,
+              "per": 8.400334938298041,
+              "eps_growth": 17.99783915602024,
+              "volatility": 3.547294070875739
+            }
+          }
+        },
+        "sentiment_bonus": -0.4244092942136013
+      }
+    },
+    {
+      "code": "000270",
+      "score": 87.71516026330463,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 87.66241626788835,
+          "details": {
+            "factor_score": 100,
+            "supply_score": 100,
+            "volatility_score": 58.87472089296117,
+            "metrics": {
+              "roe": 18.716141706373644,
+              "per": 6.655520709770622,
+              "eps_growth": 15.91731795578358,
+              "volatility": 4.112527910703883
+            }
+          }
+        },
+        "sentiment_bonus": 0.05274399541627714
+      }
+    },
+    {
+      "code": "005490",
+      "score": 85.24333679190326,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 85.78938359756506,
+          "details": {
+            "factor_score": 90.84623584514148,
+            "supply_score": 96.61844504745412,
+            "volatility_score": 68.21785248424081,
+            "metrics": {
+              "roe": 11.765033530482995,
+              "per": 15.17410310196567,
+              "eps_growth": 22.490271886141166,
+              "volatility": 3.178214751575919
+            }
+          }
+        },
+        "sentiment_bonus": -0.5460468056618011
+      }
+    },
+    {
+      "code": "035420",
+      "score": 82.71799884570221,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 83.19901962381283,
+          "details": {
+            "factor_score": 100,
+            "supply_score": 58.94279362510555,
+            "volatility_score": 85.05393845427055,
+            "metrics": {
+              "roe": 16.81612585743075,
+              "per": 13.881446807520751,
+              "eps_growth": 27.909537457113913,
+              "volatility": 1.4946061545729448
+            }
+          }
+        },
+        "sentiment_bonus": -0.4810207781106229
+      }
+    },
+    {
+      "code": "207940",
+      "score": 78.66060004856023,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 79.14049427891095,
+          "details": {
+            "factor_score": 83.28118883139808,
+            "supply_score": 83.85028888711486,
+            "volatility_score": 68.9097736007242,
+            "metrics": {
+              "roe": 16.57801459243263,
+              "per": 20.09039629432757,
+              "eps_growth": 10.215555940860387,
+              "volatility": 3.109022639927581
+            }
+          }
+        },
+        "sentiment_bonus": -0.4798942303507228
+      }
+    },
+    {
+      "code": "005930",
+      "score": 78.40169531822092,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 77.59022505655587,
+          "details": {
+            "factor_score": 90.5810218095064,
+            "supply_score": 55.042935781362075,
+            "volatility_score": 82.81645199448232,
+            "metrics": {
+              "roe": 11.800917673128074,
+              "per": 14.41378625035481,
+              "eps_growth": 21.39297271360506,
+              "volatility": 1.7183548005517681
+            }
+          }
+        },
+        "sentiment_bonus": 0.8114702616650502
+      }
+    },
+    {
+      "code": "068270",
+      "score": 72.17110688086517,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 71.78818986536749,
+          "details": {
+            "factor_score": 47.221348481852836,
+            "supply_score": 99.62388149224401,
+            "volatility_score": 76.70828674984384,
+            "metrics": {
+              "roe": 7.161921104291141,
+              "per": 25.320529261566328,
+              "eps_growth": -1.7819644651631172,
+              "volatility": 2.3291713250156167
+            }
+          }
+        },
+        "sentiment_bonus": 0.38291701549767937
+      }
+    },
+    {
+      "code": "035720",
+      "score": 69.33011759768942,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 69.34297176830844,
+          "details": {
+            "factor_score": 84.98529796534112,
+            "supply_score": 27.857394223993783,
+            "volatility_score": 89.97211438324618,
+            "metrics": {
+              "roe": 5.747560579170503,
+              "per": 7.174082942169103,
+              "eps_growth": 20.66425974916921,
+              "volatility": 1.0027885616753816
+            }
+          }
+        },
+        "sentiment_bonus": -0.012854170619027022
+      }
+    },
+    {
+      "code": "005380",
+      "score": 64.05130005385392,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 64.59216065404732,
+          "details": {
+            "factor_score": 69.9587049376677,
+            "supply_score": 71.39457842787203,
+            "volatility_score": 50.634350502062105,
+            "metrics": {
+              "roe": 15.982466601320905,
+              "per": 16.0101371229576,
+              "eps_growth": -5.996091142016513,
+              "volatility": 4.936564949793789
+            }
+          }
+        },
+        "sentiment_bonus": -0.540860600193394
+      }
+    },
+    {
+      "code": "000660",
+      "score": 62.460748129419486,
+      "details": {
+        "momentum_analysis": {
+          "total_score": 62.05792812255537,
+          "details": {
+            "factor_score": 60.97678561022907,
+            "supply_score": 63.198918812771716,
+            "volatility_score": 62.3584607821074,
+            "metrics": {
+              "roe": 14.011458034873044,
+              "per": 18.297819895486196,
+              "eps_growth": -8.748310564030817,
+              "volatility": 3.76415392178926
+            }
+          }
+        },
+        "sentiment_bonus": 0.4028200068641158
+      }
+    }
+  ]
+}

@@ -9,6 +9,8 @@ from .config import get_config
 from .database import get_database
 from .api import KISAPIClient
 from .execution import OrderExecutor
+from .strategy.rsi_strategy import RSIStrategy
+from .scheduler import Scheduler
 
 # 로깅 설정
 setup_logging()
@@ -35,6 +37,13 @@ class TradingSystem:
         self.db = get_database()
         self.api_client = KISAPIClient(mode=self.mode)
         self.order_executor = OrderExecutor(mode=self.mode)
+        
+        # 전략 초기화 (RSI 전략)
+        self.target_codes = ["005930", "000660", "035420"]  # 삼성전자, SK하이닉스, NAVER
+        self.strategies = {
+            code: RSIStrategy(config={'rsi_period': 14})
+            for code in self.target_codes
+        }
         
         # 시그널 핸들러 등록
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -71,26 +80,83 @@ class TradingSystem:
         
         logger.info("Trading system started")
         logger.info(f"Mode: {self.mode.upper()}")
-        logger.info(f"Market hours: {self.config.get('schedule.market_open')} - "
-                   f"{self.config.get('schedule.market_close')}")
+        logger.info(f"Target Stocks: {self.target_codes}")
+        
+        # 스케줄러 초기화
+        self.scheduler = Scheduler()
         
         try:
+            # 스케줄러 시작 (백그라운드 태스크)
+            scheduler_task = asyncio.create_task(self.scheduler.start())
+            
             while self.running:
                 # 현재 시각
                 now = datetime.now()
                 
-                # TODO: 여기에 실제 트레이딩 로직 구현
-                # 1. 시장 데이터 수집
-                # 2. 특징 계산
-                # 3. AI 예측
-                # 4. 전략 실행
-                # 5. 주문 실행
-                # 6. 모니터링
+                # Watchlist 업데이트 확인
+                try:
+                    import json
+                    import os
+                    watchlist_path = "config/watchlist.json"
+                    if os.path.exists(watchlist_path):
+                        with open(watchlist_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            new_codes = data.get('stocks', [])
+                            # 리스트가 변경되었으면 업데이트
+                            if set(new_codes) != set(self.target_codes):
+                                logger.info(f"Watchlist updated: {self.target_codes} -> {new_codes}")
+                                self.target_codes = new_codes
+                                # 새 종목에 대한 전략 인스턴스 생성 (기존 전략 유지/새 전략 추가)
+                                for code in self.target_codes:
+                                    if code not in self.strategies:
+                                        self.strategies[code] = RSIStrategy(config={'rsi_period': 14})
+                except Exception as e:
+                    logger.error(f"Failed to update watchlist: {e}")
+
+                for code in self.target_codes:
+                    try:
+                        # 1. 시장 데이터 수집 (현재가)
+                        current_price = 70000 # 기본값
+                        try:
+                            # 동기식 호출 (임시)
+                            if hasattr(self.api_client, 'get_stock_price'):
+                                quote = self.api_client.get_stock_price(code)
+                                current_price = quote.current_price
+                        except Exception as e:
+                            logger.warning(f"[{code}] Failed to fetch price: {e}. Using dummy data.")
+                            import random
+                            current_price = 70000 + random.randint(-1000, 1000)
+
+                        logger.info(f"[{code}] Current Price: {current_price:,}원")
+
+                        # 2. 전략 분석
+                        market_data = {'current_price': current_price}
+                        strategy = self.strategies[code]
+                        signal = strategy.analyze(market_data)
+                        
+                        # 3. 신호에 따른 주문 실행
+                        if signal in ['BUY', 'SELL']:
+                            from .api import OrderRequest
+                            
+                            order = OrderRequest(
+                                stock_code=code,
+                                order_type=signal,
+                                price=0,  # 시장가
+                                quantity=1
+                            )
+                            
+                            logger.info(f"[{code}] >>> Sending {signal} Order")
+                            await self.order_executor.place_order(order)
+                            
+                    except Exception as e:
+                        logger.error(f"Error processing {code}: {e}")
                 
-                logger.debug(f"System running... {now}")
+                # 1초마다 루프
+                await asyncio.sleep(1)
                 
-                # 10초마다 루프
-                await asyncio.sleep(10)
+            # 메인 루프 종료 시 스케줄러도 종료
+            self.scheduler.stop()
+            await scheduler_task
         
         except Exception as e:
             logger.error(f"Error in main loop: {e}", exc_info=True)

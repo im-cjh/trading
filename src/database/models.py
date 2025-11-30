@@ -103,3 +103,22 @@ class MarketData(Base):
     __table_args__ = (
         Index('idx_stock_timeframe_timestamp', 'stock_code', 'timeframe', 'timestamp'),
     )
+
+
+class VirtualTrade(Base):
+    """가상 거래 내역 (시뮬레이션용)"""
+    __tablename__ = 'virtual_trades'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    strategy_name = Column(String(50), nullable=False, index=True)
+    stock_code = Column(String(20), nullable=False, index=True)
+    order_type = Column(String(10), nullable=False)  # buy/sell
+    price = Column(Integer, nullable=False)
+    quantity = Column(Integer, nullable=False)
+    profit_loss = Column(Integer)  # 매도 시 실현 손익
+    profit_loss_rate = Column(Float)
+    timestamp = Column(DateTime, default=datetime.now, index=True)
+    
+    __table_args__ = (
+        Index('idx_strategy_stock', 'strategy_name', 'stock_code'),
+    )
