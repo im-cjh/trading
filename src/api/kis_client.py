@@ -47,6 +47,7 @@ class KISAPIClient:
             "appkey": self.app_key,
             "appsecret": self.app_secret,
             "tr_id": tr_id,
+            "custtype": "P",  # P: 개인, B: 법인
         }
         
         if include_token:
@@ -68,6 +69,11 @@ class KISAPIClient:
         logger.info("Refreshing access token...")
         
         url = f"{self.base_url}/oauth2/tokenP"
+        
+        # KIS API는 JSON이 아닌 form data를 요구함
+        headers = {
+            "Content-Type": "application/json"
+        }
         data = {
             "grant_type": "client_credentials",
             "appkey": self.app_key,
@@ -75,7 +81,9 @@ class KISAPIClient:
         }
         
         try:
-            response = requests.post(url, json=data, timeout=self.timeout)
+            logger.debug(f"Requesting token from: {url}")
+            response = requests.post(url, json=data, headers=headers, timeout=self.timeout)
+            logger.debug(f"Token response status: {response.status_code}")
             response.raise_for_status()
             
             token_data = response.json()
@@ -83,10 +91,17 @@ class KISAPIClient:
             expires_in = token_data.get('expires_in', 86400)  # 기본 24시간
             self._token_expires_at = datetime.now() + timedelta(seconds=expires_in)
             
-            logger.info(f"Access token obtained, expires at {self._token_expires_at}")
+            logger.info(f"Access token obtained successfully, expires at {self._token_expires_at}")
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 403:
+                # Rate limit (1분당 1회 제한)
+                logger.warning(f"Token refresh rate limited (1/min). Will retry later.")
+                # 토큰 만료 시간을 1분 후로 설정해서 재시도 방지
+                self._token_expires_at = datetime.now() + timedelta(minutes=1)
+            else:
+                logger.error(f"HTTP error during token refresh: {e.response.status_code} - {e.response.text if hasattr(e.response, 'text') else 'No response body'}")
         except Exception as e:
-            logger.error(f"Failed to refresh token: {e}")
-            raise
+            logger.error(f"Failed to refresh token: {type(e).__name__}: {e}")
     
     def _request(self, method: str, endpoint: str, **kwargs) -> Dict[str, Any]:
         """API 요청 (재시도 로직 포함)"""

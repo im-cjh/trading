@@ -101,7 +101,10 @@ class TradingSystem:
                     if os.path.exists(watchlist_path):
                         with open(watchlist_path, 'r', encoding='utf-8') as f:
                             data = json.load(f)
-                            new_codes = data.get('stocks', [])
+                            stocks_data = data.get('stocks', [])
+                            # 딕셔너리 리스트에서 종목코드만 추출
+                            new_codes = [stock['code'] if isinstance(stock, dict) else stock 
+                                        for stock in stocks_data]
                             # 리스트가 변경되었으면 업데이트
                             if set(new_codes) != set(self.target_codes):
                                 logger.info(f"Watchlist updated: {self.target_codes} -> {new_codes}")
@@ -156,7 +159,11 @@ class TradingSystem:
                 
             # 메인 루프 종료 시 스케줄러도 종료
             self.scheduler.stop()
-            await scheduler_task
+            scheduler_task.cancel()
+            try:
+                await asyncio.wait_for(scheduler_task, timeout=2.0)
+            except (asyncio.CancelledError, asyncio.TimeoutError):
+                logger.info("Scheduler task cancelled")
         
         except Exception as e:
             logger.error(f"Error in main loop: {e}", exc_info=True)
