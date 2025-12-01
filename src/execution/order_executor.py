@@ -20,14 +20,9 @@ class OrderExecutor:
         self.config = get_config()
         self.mode = mode or self.config.get_trading_mode()
         
-        # 모의투자/실거래 실행기 초기화
-        if self.mode == 'mock':
-            initial_cash = self.config.get('execution.mock.initial_cash', 10000000)
-            self.executor = MockExecutor(initial_cash=initial_cash)
-            logger.info(f"OrderExecutor initialized in MOCK mode with {initial_cash:,}원")
-        else:
-            self.executor = KISAPIClient(mode='real')
-            logger.info("OrderExecutor initialized in REAL mode")
+        # KIS API 클라이언트 사용 (mock 또는 real)
+        self.executor = KISAPIClient(mode=self.mode)
+        logger.info(f"OrderExecutor initialized in {self.mode.upper()} mode using KIS API")
         
         # 주문 제한 설정
         self.max_retries = self.config.get('api.max_retries', 3)
@@ -85,16 +80,11 @@ class OrderExecutor:
         logger.info(f"Placing order: {order.order_type.upper()} {order.stock_code} "
                    f"{order.quantity}주 @ {order.price if order.price > 0 else '시장가'}원")
         
-        # 실행
+        # 실행 (비동기 래핑)
         try:
-            if isinstance(self.executor, MockExecutor):
-                # 모의투자 (동기)
-                response = self.executor.place_order(order)
-            else:
-                # 실거래 (비동기 래핑)
-                response = await asyncio.to_thread(self.executor.place_order, order)
+            response = await asyncio.to_thread(self.executor.place_order, order)
             
-            logger.info(f"Order {response.status}: {response.order_id}")
+            logger.info(f"Order {response.status}: {response.order_id} | Message: {response.message}")
             return response
         
         except Exception as e:
@@ -111,30 +101,8 @@ class OrderExecutor:
     
     async def get_account_balance(self) -> AccountBalance:
         """계좌 잔고 조회"""
-        if isinstance(self.executor, MockExecutor):
-            return self.executor.get_account_balance()
-        else:
-            return await asyncio.to_thread(self.executor.get_account_balance)
+        return await asyncio.to_thread(self.executor.get_account_balance)
     
     async def get_positions(self) -> list[Position]:
         """보유 포지션 조회"""
-        if isinstance(self.executor, MockExecutor):
-            return self.executor.get_positions()
-        else:
-            return await asyncio.to_thread(self.executor.get_positions)
-    
-    def update_price(self, stock_code: str, price: int):
-        """현재가 업데이트 (모의투자 전용)
-        
-        Args:
-            stock_code: 종목코드
-            price: 현재가
-        """
-        if isinstance(self.executor, MockExecutor):
-            self.executor.update_price(stock_code, price)
-    
-    def reset(self):
-        """계좌 초기화 (모의투자 전용)"""
-        if isinstance(self.executor, MockExecutor):
-            self.executor.reset()
-            logger.info("Mock account reset")
+        return await asyncio.to_thread(self.executor.get_positions)

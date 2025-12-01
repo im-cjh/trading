@@ -38,8 +38,47 @@ class KISAPIClient:
         self.max_retries = self.config.get('api.max_retries', 3)
         self.retry_delay = self.config.get('api.retry_delay', 1)
         
+        self._token_file = "data/kis_token.json"
+        self._load_token()
+        
         logger.info(f"KIS API Client initialized in {self.mode} mode")
     
+    def _load_token(self):
+        """저장된 토큰 로드"""
+        import json
+        import os
+        
+        try:
+            if os.path.exists(self._token_file):
+                with open(self._token_file, 'r') as f:
+                    data = json.load(f)
+                    expires_at = datetime.fromisoformat(data.get('expires_at'))
+                    
+                    if datetime.now() < expires_at:
+                        self._access_token = data.get('access_token')
+                        self._token_expires_at = expires_at
+                        logger.info(f"Loaded valid token from file (expires: {expires_at})")
+                    else:
+                        logger.info("Saved token is expired")
+        except Exception as e:
+            logger.warning(f"Failed to load token: {e}")
+
+    def _save_token(self):
+        """토큰 파일 저장"""
+        import json
+        
+        try:
+            if self._access_token and self._token_expires_at:
+                data = {
+                    'access_token': self._access_token,
+                    'expires_at': self._token_expires_at.isoformat()
+                }
+                with open(self._token_file, 'w') as f:
+                    json.dump(data, f)
+                logger.info("Token saved to file")
+        except Exception as e:
+            logger.warning(f"Failed to save token: {e}")
+
     def _get_headers(self, tr_id: str, include_token: bool = True) -> Dict[str, str]:
         """API 요청 헤더 생성"""
         headers = {
@@ -53,6 +92,10 @@ class KISAPIClient:
         if include_token:
             if not self._access_token or self._is_token_expired():
                 self._refresh_token()
+            
+            if not self._access_token:
+                raise RuntimeError("Failed to obtain access token")
+                
             headers["authorization"] = f"Bearer {self._access_token}"
         
         return headers
@@ -91,13 +134,18 @@ class KISAPIClient:
             expires_in = token_data.get('expires_in', 86400)  # 기본 24시간
             self._token_expires_at = datetime.now() + timedelta(seconds=expires_in)
             
+            self._save_token()
+            
             logger.info(f"Access token obtained successfully, expires at {self._token_expires_at}")
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 403:
                 # Rate limit (1분당 1회 제한)
-                logger.warning(f"Token refresh rate limited (1/min). Will retry later.")
-                # 토큰 만료 시간을 1분 후로 설정해서 재시도 방지
-                self._token_expires_at = datetime.now() + timedelta(minutes=1)
+                logger.warning(f"Token refresh rate limited (1/min).")
+                # 기존 토큰이 없으면 치명적 오류
+                if not self._access_token:
+                    logger.error("No valid token available and refresh limit hit.")
+                    # 여기서 raise를 하면 메인 루프가 죽을 수 있으므로, 
+                    # 호출하는 쪽에서 처리하도록 둠 (하지만 _get_headers에서 체크함)
             else:
                 logger.error(f"HTTP error during token refresh: {e.response.status_code} - {e.response.text if hasattr(e.response, 'text') else 'No response body'}")
         except Exception as e:

@@ -41,7 +41,7 @@ class TradingSystem:
         # 전략 초기화 (RSI 전략)
         self.target_codes = ["005930", "000660", "035420"]  # 삼성전자, SK하이닉스, NAVER
         self.strategies = {
-            code: RSIStrategy(config={'rsi_period': 14})
+            code: RSIStrategy(config={'rsi_period': 2})
             for code in self.target_codes
         }
         
@@ -130,7 +130,7 @@ class TradingSystem:
                             import random
                             current_price = 70000 + random.randint(-1000, 1000)
 
-                        logger.info(f"[{code}] Current Price: {current_price:,}원")
+                        #logger.info(f"[{code}] Current Price: {current_price:,}원")
 
                         # 2. 전략 분석
                         market_data = {'current_price': current_price}
@@ -153,6 +153,9 @@ class TradingSystem:
                             
                     except Exception as e:
                         logger.error(f"Error processing {code}: {e}")
+                    
+                    # API 호출 제한을 피하기 위한 딜레이
+                    await asyncio.sleep(1.0)
                 
                 # 1초마다 루프
                 await asyncio.sleep(1)
